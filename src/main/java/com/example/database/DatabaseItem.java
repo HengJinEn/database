@@ -40,9 +40,18 @@ class CharItem extends DatabaseItem<Character> {
     }
 }
 
-class NumericItem extends DatabaseItem<Double> {
+class NumericItem extends DatabaseItem<Number> {
     public NumericItem(double value) {
         super(value);
+    }
+
+    public NumericItem(int value) {
+        super(value);
+    }
+
+    @Override
+    public String getType() {
+        return "Number";
     }
 
     @Override
@@ -56,6 +65,11 @@ class CollectionItem<T> extends DatabaseItem<T[]>{
 
     public CollectionItem(T[] value) {
         super(value);
+    }
+
+    @Override
+    public String getType() {
+        return "Collection";
     }
 
     @Override
