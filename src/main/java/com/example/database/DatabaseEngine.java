@@ -1,79 +1,102 @@
 package com.example.database;
 import com.example.database.DataStructure.MyHashMap;
 import com.example.database.DataStructure.MyLinkedList;
-import java.io.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.io.*;
 
 
-public class DatabaseEngine {
 
-    private static final String DATABASE_FILE_PATH = "database.dat";
-    private MyHashMap<String, DatabaseItem<?>> databaseSpine = new MyHashMap<>();
+public class DatabaseEngine implements Serializable {
+    private static DatabaseEngine instance;
+
+    MyHashMap<String, DatabaseItem<?>> databaseSpine = new MyHashMap<>();
 
     public DatabaseEngine() {
-        this.databaseSpine = loadDatabaseFromDisk();
+
     }
 
-    public String insertData(String dataType,String index, DatabaseItem<?> data) {
+    public static void setInstance(DatabaseEngine engineInstance) {
+        instance = engineInstance;
+    }
+
+    public static DatabaseEngine getInstance() {
+        if (instance == null) {
+            instance = new DatabaseEngine();
+        }
+        return instance;
+    }
+
+    public void insertData(String dataType, String index, DatabaseItem<?> data) throws ParseException {
 
         switch (dataType) {
-            case "str":
-                databaseSpine.put(index, new StringItem(data.getValue().toString()));
-                break;
-            case "c":
+            case "String" -> {
+                if (data.getValue() instanceof String) {
+                    databaseSpine.put(index, new StringItem(data.getValue().toString()));
+                } else {
+                    showErrorDialog("Invalid value for String type. Please try again!");
+                }
+            }
+            case "Character" -> {
                 if (data.getValue().toString().length() == 1) {
                     databaseSpine.put(index, new CharItem(data.getValue().toString().charAt(0)));
                 } else {
-                    return "[Database] Error! Character data must be a single character. Please try again!";
+                    showErrorDialog("Invalid character input. Please try again!");
                 }
-                break;
-            case "num":
-                try {
-                    // If it's a whole number, insert as Integer
-                    if (data.getValue().toString().matches("\\d+")) {
-                        int intValue = Integer.parseInt(data.getValue().toString());
-                        databaseSpine.put(index, new NumericItem(intValue));
-                    } else {
-                        // Otherwise, insert as Double
-                        double numValue = Double.parseDouble(data.getValue().toString());
-                        databaseSpine.put(index, new NumericItem(numValue));
-                    }
-
-                } catch (NumberFormatException e) {
-                    return "[Database] Error! Not a number. Please try again!\n";
+            }
+            case "Integer" -> {
+                if (data.getValue().toString().matches("\\d+")) {
+                    int intValue = Integer.parseInt(data.getValue().toString());
+                    databaseSpine.put(index, new NumericItem(intValue));
+                } else {
+                    showErrorDialog("Invalid integer input. Please enter a valid integer!");
                 }
-                break;
-            case "coll":
-                // Check if the data is an array
+            }
+            case "Double" -> {
+                if (data.getValue() instanceof Number) {
+                    double numValue = ((Number) data.getValue()).doubleValue();
+                    databaseSpine.put(index, new NumericItem(numValue));
+                } else {
+                    showErrorDialog("Invalid value for Double type. Please enter a valid number!");
+                }
+            }
+            case "Boolean" -> {
+                if (data.getValue() instanceof Boolean) {
+                    boolean boolValue = (Boolean) data.getValue();
+                    databaseSpine.put(index, new BooleanItem(boolValue));
+                } else {
+                    showErrorDialog("Invalid value for Boolean type. Please enter a valid boolean!");
+                }
+            }
+            case "Collections" -> {
                 if (data.getValue() instanceof Object[]) {
                     databaseSpine.put(index, new CollectionItem<>((Object[]) data.getValue()));
                 } else {
-                    return "[Database] Error! Collection data must be an array. Please try again!\n";
+                    showErrorDialog("Invalid collection input. Please try again!");
                 }
-                break;
-            case "dt":
+            }
+            case "Date" -> {
                 try {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); // Change the date format as needed
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
                     Date dateValue = dateFormat.parse(data.getValue().toString());
                     databaseSpine.put(index, new DateItem(dateValue));
                 } catch (ParseException e) {
-                    return "[Database] Error! Invalid date format. Please try again!\n";
+                    showErrorDialog("Invalid date format. Please enter a valid date!");
                 }
-                break;
-            case "bool":
-                boolean boolValue = Boolean.parseBoolean(data.getValue().toString());
-                databaseSpine.put(index, new BooleanItem(boolValue));
-                break;
-            default:
-                return "[Database] Unknown data type. Please try again!\n";
-
+            }
+            default -> showErrorDialog("Unknown data type. Please try again!");
         }
-
-        return null;
     }
 
+
+    private void showErrorDialog(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+        alert.setTitle("Error");
+        alert.showAndWait();
+    }
 
     public DatabaseItem<?> getData(String index) {
         return databaseSpine.get(index);
@@ -83,21 +106,38 @@ public class DatabaseEngine {
         return databaseSpine.remove(index);
     }
 
-    public boolean clearAllData() {
-        if(databaseSpine.isEmpty()){
-            return false;
-        }
+    public void clearAllData() {
         databaseSpine.clear();
-        return true;
     }
 
-    public String displayData(String key){
-        DatabaseItem<?> item = databaseSpine.get(key);
-        return key + " " + item.toString();
+    // Save the data to a file
+    public void saveData(String fileName) {
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(fileName))) {
+            outputStream.writeObject(this);
+            System.out.println("Data saved successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error saving data.");
+        }
     }
+
+    // Load the data from a file
+    public static DatabaseEngine loadData(String fileName) {
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName))) {
+            DatabaseEngine databaseEngine = (DatabaseEngine) inputStream.readObject();
+            System.out.println("Data loaded successfully.");
+            return databaseEngine;
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            System.out.println("Error loading data. Returning a new DatabaseEngine instance.");
+            return new DatabaseEngine();
+        }
+    }
+
+    // Debug function
     public String displayAllData() {
         MyLinkedList<String> keys = databaseSpine.keySet();
-
+        System.out.println("Display the keys: " + keys);
         StringBuilder result = new StringBuilder();
 
         if(databaseSpine.isEmpty()){
@@ -108,46 +148,12 @@ public class DatabaseEngine {
             for (int i = 0; i < keys.size(); i++) {
                 String key = keys.get(i);
                 DatabaseItem<?> item = databaseSpine.get(key);
-
-                // Append key, type, and value to the result
                 result.append(String.format("%-15s  %-15s  %-15s\n", key, item.getType(), item.toString()));
 
-
-                //result.append(key).append(" ").append(item.toString()).append("\n");
             }
         }
 
         return result.toString();
-    }
-
-    public void createTable(String tableName) {
-        // You can implement table creation logic here
-        // For simplicity, let's assume each table is just a separate HashMap
-        MyHashMap<String, DatabaseItem<?>> table = new MyHashMap<>();
-        // Add additional logic as needed
-
-        // Save the updated data to disk
-        saveDatabaseToDisk();
-    }
-
-    private void saveDatabaseToDisk() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DATABASE_FILE_PATH))) {
-            oos.writeObject(databaseSpine);
-        } catch (IOException e) {
-            // Handle exceptions (e.g., unable to write to file)
-        }
-    }
-
-    private MyHashMap<String, DatabaseItem<?>> loadDatabaseFromDisk() {
-        MyHashMap<String, DatabaseItem<?>> loadedData = new MyHashMap<>();
-
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(DATABASE_FILE_PATH))) {
-            loadedData = (MyHashMap<String, DatabaseItem<?>>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            // Handle exceptions (e.g., file not found, corrupted data)
-        }
-
-        return loadedData;
     }
 
 

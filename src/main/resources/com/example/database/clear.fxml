@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="150.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.database.Controller">
+    <children>
+      <Text fx:id="messageToClear" layoutX="178.0" layoutY="79.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="527.2000732421875" />
+       
+
+    </children>
+</AnchorPane>

@@ -1,13 +1,16 @@
 package com.example.database;
 
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class DatabaseItem<T> {
+public class DatabaseItem<T> implements Serializable {
     private final T value;
 
     public DatabaseItem(T value) {
         this.value = value;
     }
+
 
     public T getValue() {
         return value;
@@ -106,6 +109,7 @@ class DateItem extends DatabaseItem<Date> {
 
     @Override
     public String toString() {
-        return getValue().toString();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        return dateFormat.format(getValue());
     }
 }

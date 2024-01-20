@@ -1,6 +1,9 @@
 package com.example.database.DataStructure;
 
-public class MyLinkedList<T> {
+
+import java.io.Serializable;
+
+public class MyLinkedList<T> implements Serializable {
     private Node<T> head;
     private int size;
 
@@ -39,7 +42,7 @@ public class MyLinkedList<T> {
         return current.data;
     }
 
-    public T remove(int index) {
+    public void remove(int index) {
 
         if (index < 0 || index >= size || head == null) {
             throw new IndexOutOfBoundsException("Invalid index");
@@ -57,7 +60,6 @@ public class MyLinkedList<T> {
             current.next = current.next.next;
         }
         size--;
-        return removedData;
     }
 
     public int size() {
@@ -65,36 +67,32 @@ public class MyLinkedList<T> {
     }
 
     public void clear() {
+        head = null;
+        size = 0;
+
     }
 
-    public void remove(T entry) {
-
-        if (head == null) {
-            return;
-        }
-
-        if (head.data.equals(entry)) {
-            head = head.next;
-            size--;
-            return;
-        }
-
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder("[");
         Node<T> current = head;
-        while (current.next != null && !current.next.data.equals(entry)) {
+        while (current != null) {
+            result.append(current.data);
+            if (current.next != null) {
+                result.append(", ");
+            }
             current = current.next;
         }
-
-        if (current.next != null) {
-            current.next = current.next.next;
-            size--;
-        }
+        result.append("]");
+        return result.toString();
     }
 }
 
 
-class Node<T>{
+class Node<T> implements Serializable{
     T data;
     Node<T> next;
+
 
     public Node(T data) {
         this.data = data;

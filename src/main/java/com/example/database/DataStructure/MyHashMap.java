@@ -2,12 +2,15 @@ package com.example.database.DataStructure;
 
 // MyHashMap.java
 
-public class MyHashMap<K, V> {
+import java.io.Serializable;
 
-    private class Entry {
+public class MyHashMap<K, V> implements Serializable {
+
+    private class Entry implements Serializable{
         K key;
         V value;
-
+        Entry next;
+        Entry prev;
         Entry(K key, V value) {
             this.key = key;
             this.value = value;
@@ -16,8 +19,12 @@ public class MyHashMap<K, V> {
 
     private int size;
     MyLinkedList<Entry> [] buckets;
-    private static final double LOAD_FACTOR_THRESHOLD = 0.75;
 
+    // Head and tail pointers for maintaining the order
+    private Entry head;
+    private Entry tail;
+
+    private static final double LOAD_FACTOR_THRESHOLD = 0.75;
     private static final int DEFAULT_CAPACITY = 16;
     public MyHashMap(){
         buckets = new MyLinkedList[DEFAULT_CAPACITY];
@@ -32,6 +39,7 @@ public class MyHashMap<K, V> {
         return Math.abs(key.hashCode() % buckets.length);
     }
 
+    @SuppressWarnings("unchecked")
     private void resize(int newCapacity) {
         MyLinkedList<Entry>[] newBuckets = new MyLinkedList[newCapacity];
         for (int i = 0; i < newCapacity; i++) {
@@ -60,11 +68,21 @@ public class MyHashMap<K, V> {
                 entry.value = value;
                 return;
             }
-
         }
 
-        bucket.add(new Entry(key, value));
+        Entry newEntry = new Entry(key, value);
+        bucket.add(newEntry);
         size++;
+
+        // Update the linked list for maintaining order
+        if (tail == null) {
+            head = newEntry;
+            tail = newEntry;
+        } else {
+            newEntry.prev = tail;
+            tail.next = newEntry;
+            tail = newEntry;
+        }
 
         double loadFactor = (double) size / buckets.length;
         if (loadFactor > LOAD_FACTOR_THRESHOLD) {
@@ -72,6 +90,7 @@ public class MyHashMap<K, V> {
             resize(newCapacity);
         }
     }
+
 
     public V get(K key) {
         int index = hashFunction(key);
@@ -96,6 +115,19 @@ public class MyHashMap<K, V> {
             Entry entry = bucket.get(i);
             if (entry.key.equals(key)) {
                 V removedValue = entry.value;
+
+                if (entry.prev != null) {
+                    entry.prev.next = entry.next;
+                } else {
+                    head = entry.next;
+                }
+
+                if (entry.next != null) {
+                    entry.next.prev = entry.prev;
+                } else {
+                    tail = entry.prev;
+                }
+
                 bucket.remove(i);
                 size--;
 
@@ -115,11 +147,10 @@ public class MyHashMap<K, V> {
     public MyLinkedList<K> keySet(){
         MyLinkedList<K> keys = new MyLinkedList<>();
 
-        for (MyLinkedList<Entry> bucket : buckets){
-            for (int i = 0; i < bucket.size(); i++) {
-                Entry entry = bucket.get(i);
-                keys.add(entry.key);
-            }
+        Entry current = head;
+        while (current != null) {
+            keys.add(current.key);
+            current = current.next;
         }
 
         return keys;
