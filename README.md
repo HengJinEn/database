@@ -1,4 +1,4 @@
-### Setting up for Database Project
+# Setting up for Database Project
 We are using IntelliJ Idea IDE and JavaFX to develop our project.
 Please watch the following videos for setting up.
 
