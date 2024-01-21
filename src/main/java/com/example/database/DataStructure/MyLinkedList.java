@@ -47,16 +47,13 @@ public class MyLinkedList<T> implements Serializable {
         if (index < 0 || index >= size || head == null) {
             throw new IndexOutOfBoundsException("Invalid index");
         }
-        T removedData;
         if (index == 0) {
-            removedData = head.data;
             head = head.next;
         } else {
             Node<T> current = head;
             for (int i = 0; i < index - 1; i++) {
                 current = current.next;
             }
-            removedData = current.next.data;
             current.next = current.next.next;
         }
         size--;
@@ -86,18 +83,21 @@ public class MyLinkedList<T> implements Serializable {
         result.append("]");
         return result.toString();
     }
-}
+
+    private static class Node<T> implements Serializable{
+        T data;
+        Node<T> next;
 
 
-class Node<T> implements Serializable{
-    T data;
-    Node<T> next;
+        public Node(T data) {
+            this.data = data;
+            this.next = null;
+        }
 
 
-    public Node(T data) {
-        this.data = data;
-        this.next = null;
     }
 
-
 }
+
+
+

@@ -26,6 +26,8 @@ public class MyHashMap<K, V> implements Serializable {
 
     private static final double LOAD_FACTOR_THRESHOLD = 0.75;
     private static final int DEFAULT_CAPACITY = 16;
+
+    @SuppressWarnings("unchecked")
     public MyHashMap(){
         buckets = new MyLinkedList[DEFAULT_CAPACITY];
         for (int i = 0; i < DEFAULT_CAPACITY; i++) {
