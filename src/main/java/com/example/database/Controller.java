@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable, Serializable {
@@ -168,10 +169,11 @@ public class Controller implements Initializable, Serializable {
 
 
     private DatabaseItem<?> createDataItem(String selectedValue) {
-        if (selectedType == "Collections") {
+        if (Objects.equals(selectedType, "Collections")) {
             Object[] parsedData = parseCollectionData(selectedValue);
             return new CollectionItem<>(parsedData);
         }
+
        return new DatabaseItem<>(selectedValue);
     }
 
@@ -206,11 +208,14 @@ public class Controller implements Initializable, Serializable {
         tableData.clear();
 
         MyLinkedList<String> keys = databaseEngine.databaseSpine.keySet();
-        // Populate the ObservableList with DatabaseItems
+
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);
             DatabaseItem<?> item = databaseEngine.getData(key);
-            tableData.add(new OneRow(key, item.getType(), item.toString()));
+            // Check if 'item' is null before adding it to 'tableData'
+            if (item != null) {
+                tableData.add(new OneRow(key, item.getType(), item.toString()));
+            }
         }
 
         indexUnit.setCellValueFactory(new PropertyValueFactory<>("index"));

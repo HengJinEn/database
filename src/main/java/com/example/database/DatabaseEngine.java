@@ -60,12 +60,18 @@ public class DatabaseEngine implements Serializable {
                     double numValue = ((Number) data.getValue()).doubleValue();
                     databaseSpine.put(index, new NumericItem(numValue));
                 } else {
-                    showErrorDialog("Invalid value for Double type. Please enter a valid number!");
+                    try {
+                        double numValue = Double.parseDouble(data.getValue().toString());
+                        databaseSpine.put(index, new NumericItem(numValue));
+                    } catch (NumberFormatException e) {
+                        showErrorDialog("Invalid value for Double type. Please enter a valid number!");
+                    }
                 }
             }
             case "Boolean" -> {
-                if (data.getValue() instanceof Boolean) {
-                    boolean boolValue = (Boolean) data.getValue();
+                String stringValue = data.getValue().toString();
+                if (stringValue.equals("true") || stringValue.equals("false")) {
+                    boolean boolValue = Boolean.parseBoolean(stringValue);
                     databaseSpine.put(index, new BooleanItem(boolValue));
                 } else {
                     showErrorDialog("Invalid value for Boolean type. Please enter a valid boolean!");
@@ -110,29 +116,6 @@ public class DatabaseEngine implements Serializable {
         databaseSpine.clear();
     }
 
-    // Save the data to a file
-    public void saveData(String fileName) {
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(fileName))) {
-            outputStream.writeObject(this);
-            System.out.println("Data saved successfully.");
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Error saving data.");
-        }
-    }
-
-    // Load the data from a file
-    public static DatabaseEngine loadData(String fileName) {
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName))) {
-            DatabaseEngine databaseEngine = (DatabaseEngine) inputStream.readObject();
-            System.out.println("Data loaded successfully.");
-            return databaseEngine;
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-            System.out.println("Error loading data. Returning a new DatabaseEngine instance.");
-            return new DatabaseEngine();
-        }
-    }
 
     // Debug function
     public String displayAllData() {
