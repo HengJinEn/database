@@ -14,7 +14,7 @@
         <items>
           <AnchorPane fx:id="pane1" maxHeight="150.0" minHeight="150.0" minWidth="0.0" prefHeight="100.0" prefWidth="798.0">
                <children>
-                  <Text layoutX="48.0" layoutY="55.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Welcome to GRP44 Database" wrappingWidth="311.622314453125">
+                  <Text layoutX="48.0" layoutY="55.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Welcome to GRP43 Database" wrappingWidth="311.622314453125">
                      <font>
                         <Font name="System Bold" size="20.0" />
                      </font>

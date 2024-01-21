@@ -131,7 +131,7 @@ public class Controller implements Initializable, Serializable {
                 typeMenu.setText(selectedType); // Update MenuButton text
             }
             case "Date" -> {
-                valueExample.setText("Example: 02-02-2024");
+                valueExample.setText("Example: 28-02-2024");
                 typeMenu.setText(selectedType); // Update MenuButton text
             }
             case "Collections" -> {
